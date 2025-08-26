@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Date, ForeignKey, create_engine, CheckConstraint,func
+from sqlalchemy import Column, Integer, String, Text, Date, ForeignKey, create_engine, UniqueConstraint,func
 from sqlalchemy.orm import relationship, validates
 from init import engine , session, Base
 
@@ -29,7 +29,7 @@ class Patient(Base):
     
     def __repr__ (self):
         ward_name = self.ward.ward_name if hasattr(self, "ward") and self.ward else None
-        return f"<Patient_name:{self.full_name}, ward_name:{ward_name}, bed_number:{self.bed_number}>"
+        return f"<Patient_name:{self.full_name}, ward_name:{ward_name}, bed_number:{self.bed_number}>\n"
 
 
 #schema for the doctors table

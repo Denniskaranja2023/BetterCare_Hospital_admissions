@@ -85,7 +85,7 @@ if __name__ == '__main__':
             full_name = f"{fake.first_name_male()} {fake.last_name()}"
         else:
             full_name = f"{fake.first_name_female()} {fake.last_name()}"
-
+        bed_numbers= range(1,random_ward.ward_capacity)
         patient= Patient(
             full_name= full_name,
             gender= gender,

@@ -30,7 +30,7 @@ class Patient(Base):
     def __repr__ (self):
         ward_name = self.ward.ward_name if hasattr(self, "ward") and self.ward else None
         return f"<Patient_name:{self.full_name}, ward_name:{ward_name}, bed_number:{self.bed_number}>\n"
-
+    
 
 #schema for the doctors table
 class Doctor(Base):
@@ -55,6 +55,7 @@ class Ward(Base):
     ward_capacity= Column(Integer())
     ward_location= Column(String())
     patients= relationship('Patient', backref='ward')
+    patient_count = Column(Integer, default=0)
     
     def __repr__(self):
         return f"<Ward {self.id}: name:{self.ward_name}, location:{self.ward_location}>"

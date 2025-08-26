@@ -1,6 +1,7 @@
 from faker import Faker
 import random
 from init import session
+from helper import admit_patient
 
 from models import Ward
 from models import Doctor
@@ -74,32 +75,36 @@ if __name__ == '__main__':
     session.commit()
     
     
-    patients=[]
+    
     for i in range(30):
-        random_ward=random.choice(wards)
-        random_doctor= random.choice(doctors)
-        random_nurse= random.choice(nurses)
+        admitted = False
+        while not admitted:
+            random_ward = random.choice(wards)
+            random_doctor = random.choice(doctors)
+            random_nurse = random.choice(nurses)
 
-        gender = random.choice(genders)
-        if gender == "Male":
-            full_name = f"{fake.first_name_male()} {fake.last_name()}"
-        else:
-            full_name = f"{fake.first_name_female()} {fake.last_name()}"
-        bed_numbers= range(1,random_ward.ward_capacity)
-        patient= Patient(
-            full_name= full_name,
-            gender= gender,
-            age= random.randint(13, 70),
-            reported_condition= fake.sentence(),
-            doctor_prescription= fake.sentence(),
-            ward_id= random_ward.id,
-            bed_number= random.randint(1, random_ward.ward_capacity),
-            doctor_id= random_doctor.id,
-            nurse_id= random_nurse.id,
-            admission_date = fake.date_between(start_date="-1y", end_date="today")
-        )
-        patients.append(patient)
-        
-    session.add_all(patients)
+            gender = random.choice(genders)
+            if gender == "Male":
+                full_name = f"{fake.first_name_male()} {fake.last_name()}"
+            else:
+                full_name = f"{fake.first_name_female()} {fake.last_name()}"
+
+            try:
+                admit_patient(
+                    session,
+                    full_name=full_name,
+                    gender=gender,
+                    age=random.randint(13, 70),
+                    reported_condition=fake.sentence(),
+                    doctor_prescription=fake.sentence(),
+                    ward_id=random_ward.id,
+                    bed_number=random.randint(1, random_ward.ward_capacity),
+                    doctor_id=random_doctor.id,
+                    nurse_id=random_nurse.id
+                )
+                admitted = True 
+            except ValueError as e:
+                continue
+
     session.commit()
     session.close()

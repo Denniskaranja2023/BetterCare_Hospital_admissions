@@ -27,3 +27,4 @@ def discharge_patient(session, patient):
     ward.patient_count -=1
     session.delete(patient)
 
+

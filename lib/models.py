@@ -1,9 +1,8 @@
 from sqlalchemy import Column, Integer, String, Text, Date, ForeignKey, create_engine, CheckConstraint,func
-from sqlalchemy.orm import relationship 
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, validates
+from init import engine , session, Base
 
-Base = declarative_base()
-engine = create_engine("sqlite:///hospital_admissions.db")
+
 
 #schema for patients table
 class Patient(Base):
@@ -22,10 +21,7 @@ class Patient(Base):
     admission_date = Column(Date(), server_default=func.current_date())
     
     @validates("ward_id")
-    def validate_ward_capacity(self, key, ward_id):
-        from sqlalchemy.orm import object_session
-        session = object_session(self)
-
+    def validate_ward_capacity(self,key, ward_id):
         ward = session.query(Ward).get(ward_id)
         if ward and len(ward.patients) >= ward.ward_capacity:
             raise ValueError("Ward capacity exceeded")

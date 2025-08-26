@@ -64,3 +64,5 @@ class Nurse(Base):
     
     def __repr__(self):
         return f"<Nurse {self.id}: name: {self.first_name} {self.last_name},gender: {self.gender}"
+
+Base.metadata.create_all(engine)

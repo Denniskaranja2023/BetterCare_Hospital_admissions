@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Text, Date, ForeignKey, create_engine, CheckConstraint,func
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship 
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -21,9 +21,20 @@ class Patient(Base):
     nurse_id= Column(Integer(), ForeignKey('nurses.id'))
     admission_date = Column(Date(), server_default=func.current_date())
     
-    def __repr__ (self):
-        return f"<Patient_name:{self.full_name}, ward_name:{self.ward.ward_name if self.ward else None}, bed_number:{self.bed_number}>"
+    @validates("ward_id")
+    def validate_ward_capacity(self, key, ward_id):
+        from sqlalchemy.orm import object_session
+        session = object_session(self)
+
+        ward = session.query(Ward).get(ward_id)
+        if ward and len(ward.patients) >= ward.ward_capacity:
+            raise ValueError("Ward capacity exceeded")
+        return ward_id
     
+    def __repr__ (self):
+        ward_name = self.ward.ward_name if hasattr(self, "ward") and self.ward else None
+        return f"<Patient_name:{self.full_name}, ward_name:{ward_name}, bed_number:{self.bed_number}>"
+
 
 #schema for the doctors table
 class Doctor(Base):
@@ -38,6 +49,7 @@ class Doctor(Base):
     def __repr__ (self):
         return f"<Doctor {self.id}: Name:{self.first_name} {self.last_name}, speciality:{self.speciality}>"
 
+
 #schema for the wards table
 class Ward(Base):
     __tablename__= 'wards'
@@ -49,9 +61,9 @@ class Ward(Base):
     patients= relationship('Patient', backref='ward')
     
     def __repr__(self):
-        ward_name = self.ward.ward_name if hasattr(self, "ward") and self.ward else None
-        return f"<Patient_name:{self.full_name}, ward_name:{ward_name}, bed_number:{self.bed_number}>"
-
+        return f"<Ward {self.id}: name:{self.ward_name}, location:{self.ward_location}>"
+    
+    
 #schema for the nurses table
 class Nurse(Base):
     __tablename__ ='nurses'
@@ -63,6 +75,6 @@ class Nurse(Base):
     patients=relationship('Patient', backref='nurse')
     
     def __repr__(self):
-        return f"<Nurse {self.id}: name: {self.first_name} {self.last_name},gender: {self.gender}"
+        return f"<Nurse {self.id}: name: {self.first_name} {self.last_name},gender: {self.gender}>"
 
 Base.metadata.create_all(engine)

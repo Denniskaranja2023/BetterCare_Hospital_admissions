@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Date, ForeignKey, create_engine, UniqueConstraint,func
+from sqlalchemy import Column, Integer, String, Text, Date, ForeignKey,func
 from sqlalchemy.orm import relationship, validates
 from init import engine , session, Base
 

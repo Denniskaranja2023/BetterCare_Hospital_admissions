@@ -40,6 +40,10 @@ def add_doctor(session,first_name, last_name, speciality):
     session.add(new_doctor)
     session.commit()
 
+def add_prescription(session, patient, prescription):
+    """Doctor makes a prescription on evaluating condition"""
+    patient.doctor_prescription = prescription
+    session.commit()
 
 #Nurse helper functions  
 def add_nurse(session,first_name, last_name, gender):

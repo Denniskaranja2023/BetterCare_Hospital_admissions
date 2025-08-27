@@ -1,4 +1,4 @@
-from lib.init import session
+from init import session
 from models import Doctor, Patient, Nurse, Ward
 
 def admit_patient(session, full_name,gender,age,reported_condition,doctor_prescription,ward_id,bed_number,doctor_id,nurse_id):

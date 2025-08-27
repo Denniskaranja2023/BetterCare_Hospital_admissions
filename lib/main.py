@@ -1,5 +1,5 @@
 import click
-from lib.init import session
+from init import session
 from models import Doctor, Patient, Nurse, Ward
 from helper import admit_patient, discharge_patient
   

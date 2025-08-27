@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, Date, ForeignKey, create_engine, UniqueConstraint,func
 from sqlalchemy.orm import relationship, validates
-from lib.init import engine , session, Base
+from init import engine , session, Base
 
 
 

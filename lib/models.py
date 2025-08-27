@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, Date, ForeignKey, create_engine, UniqueConstraint,func
 from sqlalchemy.orm import relationship, validates
-from init import engine , session, Base
+from lib.init import engine , session, Base
 
 
 
@@ -43,7 +43,7 @@ class Doctor(Base):
     patients= relationship('Patient', backref='doctor')
     
     def __repr__ (self):
-        return f"<Doctor {self.id}: Name:{self.first_name} {self.last_name}, speciality:{self.speciality}>"
+        return f"<Doctor id {self.id}: Name:{self.first_name} {self.last_name}, speciality:{self.speciality}>\n"
 
 
 #schema for the wards table
@@ -72,6 +72,6 @@ class Nurse(Base):
     patients=relationship('Patient', backref='nurse')
     
     def __repr__(self):
-        return f"<Nurse {self.id}: name: {self.first_name} {self.last_name},gender: {self.gender}>"
+        return f"<Nurse id {self.id}: name: {self.first_name} {self.last_name},gender: {self.gender}>\n"
 
 Base.metadata.create_all(engine)

@@ -1,4 +1,4 @@
-from init import session
+from lib.init import session
 from models import Doctor, Patient, Nurse, Ward
 
 def admit_patient(session, full_name,gender,age,reported_condition,doctor_prescription,ward_id,bed_number,doctor_id,nurse_id):
@@ -26,5 +26,6 @@ def discharge_patient(session, patient):
     ward= patient.ward
     ward.patient_count -=1
     session.delete(patient)
+    session.commit()
 
 

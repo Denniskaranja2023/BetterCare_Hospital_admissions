@@ -1,5 +1,5 @@
 
-from init import engine, session
+from lib.init import engine, session
 from models import Doctor, Patient, Nurse, Ward
 
 if __name__ == '__main__':

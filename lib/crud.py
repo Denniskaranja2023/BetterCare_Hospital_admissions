@@ -90,6 +90,7 @@ if __name__ == '__main__':
                 full_name = f"{fake.first_name_female()} {fake.last_name()}"
 
             try:
+                bed_numbers=[]
                 admit_patient(
                     session,
                     full_name=full_name,
@@ -102,7 +103,7 @@ if __name__ == '__main__':
                     doctor_id=random_doctor.id,
                     nurse_id=random_nurse.id
                 )
-                admitted = True 
+                admitted = True
             except ValueError as e:
                 continue
 

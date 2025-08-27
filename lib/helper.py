@@ -1,6 +1,7 @@
 from init import session
 from models import Doctor, Patient, Nurse, Ward
 
+#Patient helper functions
 def admit_patient(session, full_name,gender,age,reported_condition,doctor_prescription,ward_id,bed_number,doctor_id,nurse_id):
     """Create a patient record,assign them to a ward and update the count."""
     chosen_ward= session.query(Ward).filter_by(id=ward_id).first()
@@ -28,4 +29,47 @@ def discharge_patient(session, patient):
     session.delete(patient)
     session.commit()
 
+#Doctor helper functions  
+def add_doctor(session,first_name, last_name, speciality):
+    """Add a new doctor"""
+    new_doctor= Doctor(
+             first_name=first_name,
+             last_name= last_name,
+             speciality=speciality       
+             )
+    session.add(new_doctor)
+    session.commit()
+
+
+#Nurse helper functions  
+def add_nurse(session,first_name, last_name, gender):
+    """Add a new nurse"""
+    new_nurse= Nurse(
+             first_name= first_name,
+             last_name= last_name,
+             gender= gender      
+             )
+    session.add(new_nurse)
+    session.commit()
+
+
+#Ward helper function 
+def add_ward(session,ward_name, ward_capacity, ward_location, patient_count):
+    """Add a new ward"""
+    new_ward= Ward(
+             ward_name= ward_name,
+             ward_capacity= ward_capacity,
+             ward_location= ward_location,
+             patient_count= patient_count     
+             )
+    session.add(new_ward)
+    session.commit()
+
+
+#delete function
+def delete_record(session, ward):
+    """Remove a record"""
+    session.delete(ward)
+    session.commit()
+    
 

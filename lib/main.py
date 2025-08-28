@@ -1,7 +1,7 @@
 import click
 from init import session
 from models import Doctor, Patient, Nurse, Ward
-from helper import admit_patient, discharge_patient, add_doctor, add_nurse, add_ward, delete_record, add_prescription
+from helper import admit_patient, discharge_patient, add_doctor, add_nurse, add_ward, delete_record, add_prescription, add_condition
   
 while True:
     click.echo(click.style('Better Care Admissions_System:', fg="blue", bg='white', underline= True))
@@ -9,7 +9,7 @@ while True:
     click.secho("1.Admissions Officer", fg='cyan')
     click.secho("2.Doctor", fg='cyan')
     click.secho("3.Nurse",fg='cyan')
-    click.secho("4.To exit", fg="red")
+    click.secho("4.To logout", fg="cyan")
     user_option= click.prompt('Enter option ', type=int)
     if user_option== 1:
         while True:
@@ -164,7 +164,8 @@ while True:
                                         break
                                     
                     if user_choice == 3:
-                        break       
+                        break  
+                         
             if user_entry==4:
                 while True:
                     click.secho("Choose an option: ", fg='yellow')
@@ -172,27 +173,41 @@ while True:
                     click.secho("2.Remove a Ward", fg="cyan")
                     click.secho("3 To return" , fg='cyan')
                     user_choice= click.prompt('Enter option ', type=int)
+                    
                     if user_choice == 1:
-                        click.secho("Enter Ward details: ", fg='yellow')
-                        ward_name=click.prompt('Enter ward name ')
-                        ward_capacity= click.prompt("Enter ward full-capacity ", type=int )
-                        ward_location= click.prompt("Enter ward location (Building,floor) ")
-                        patient_count=0
-                        add_ward(session, ward_name.strip(), ward_capacity, ward_location, patient_count)
-                        click.secho(f"{ward_name} ward successfully added", fg="green")
+                        while True:
+                            click.secho("Enter Ward details: ", fg='yellow')
+                            ward_name=click.prompt('Enter ward name ')
+                            ward_capacity= click.prompt("Enter ward full-capacity ", type=int )
+                            ward_location= click.prompt("Enter ward location (Building,floor) ")
+                            patient_count=0
+                            add_ward(session, ward_name.strip(), ward_capacity, ward_location, patient_count)
+                            click.secho(f"{ward_name} ward successfully added", fg="green")
+                            confirm_message= click.confirm("Do you want to add another ward?")
+                            if not confirm_message:
+                                click.secho("Welcome back", fg='green')
+                                break
+                        
                     if user_choice == 2:
-                        name_of_ward =click.prompt('Enter name of ward to be removed ' )
-                        capacity_of_ward= click.prompt("Enter capacity of ward(5-10)", type=int)
-                        selected_ward= session.query(Ward).filter(Ward.ward_name == name_of_ward.strip(), Ward.ward_capacity == capacity_of_ward).first()
-                        if selected_ward is None:
-                            click.secho(f"{name_of_ward} ward not found")
-                        else:
-                            confirmation= click.confirm('Are you sure you want to remove this ward?')
-                            if confirmation:
-                                delete_record(session, selected_ward)
-                                click.secho(f"{selected_ward.ward_name} ward successfuly removed!", fg="green")
+                        while True:
+                            name_of_ward =click.prompt('Enter name of ward to be removed ' )
+                            capacity_of_ward= click.prompt("Enter capacity of ward(5-10)", type=int)
+                            selected_ward= session.query(Ward).filter(Ward.ward_name == name_of_ward.strip(), Ward.ward_capacity == capacity_of_ward).first()
+                            if selected_ward is None:
+                                click.secho(f"{name_of_ward} ward not found")
+                            else:
+                                confirmation= click.confirm('Are you sure you want to remove this ward?')
+                                if confirmation:
+                                    delete_record(session, selected_ward)
+                                    click.secho(f"{selected_ward.ward_name} ward successfuly removed!", fg="green")
+                                    confirm_message= click.confirm("Do you want to remove another ward?")
+                                    if not confirm_message:
+                                        click.secho("Welcome back", fg='green')
+                                        break
+                                
                     if user_choice == 3:
                         break
+                    
             if user_entry ==5:
                 confirmation= click.confirm('Are you sure you want to return to home?')
                 if confirmation:
@@ -248,12 +263,68 @@ while True:
                         confirmation= click.confirm("Do you want to return?")
                         if confirmation:
                             break
+                        
             if user_entry==3:
                 confirmation= click.confirm('Are you sure you want to return to home?')
                 if confirmation:
                     click.secho("Welcome home", fg="green")
                     break
+                
+    if user_option==3:
+        while True:
+            click.secho("1.Check doctor's prescription for a patient", fg='cyan')
+            click.secho("2.Record a patient's condition", fg='cyan')
+            click.secho("3.Return to home", fg='cyan')
+            user_entry= click.prompt("Enter an option ", type=int)
+            if user_entry == 1:
+                nurse_id= click.prompt("Kindly enter your Nurse's id ", type=int)
+                nurse_selected = session.query(Nurse).filter_by(id = nurse_id).first()
+                if not nurse_selected:
+                    click.secho(f"nurse id {nurse_id} not found", fg="red")
+                    continue
+                click.secho(f"Hi {nurse_selected.first_name} {nurse_selected.last_name}\n", fg='yellow')   
+                click.secho("The following are patients assigned to you:", fg='yellow')
+                for patient in nurse_selected.patients:
+                    click.secho(f"{patient}", fg="magenta")
+                while True:
+                    patient_fullname = click.prompt("Enter full_name of patient to view prescription")
+                    selected_patient= session.query(Patient).filter(Patient.full_name.ilike(f'%{patient_fullname.strip()}%')).first()
+                    if selected_patient is None:
+                        click.secho(f"{patient_fullname} not found, enter a valid name", fg="red")
+                        continue
+                    else:
+                        click.secho(f"latest doctor's prescription:{selected_patient.doctor_prescription}", fg="yellow")
+                        confirmation= click.confirm("Do you want to return?")
+                        if confirmation:
+                            click.secho("Welcome back", fg="green")
+                            break
                         
-                        
-                    
-                         
+            if user_entry == 2:
+                nurse_id= click.prompt("Kindly enter your Nurse's id ", type=int)
+                nurse_selected = session.query(Nurse).filter_by(id =nurse_id).first()
+                if not nurse_selected:
+                    click.secho(f"nurse id {nurse_id} not found", fg="red")
+                    continue
+                click.secho(f"Hi {nurse_selected.first_name} {nurse_selected.last_name}\n", fg='yellow')   
+                click.secho("The following are patients assigned to you:", fg='yellow')
+                for patient in nurse_selected.patients:
+                    click.secho(f"{patient}", fg="magenta")
+                while True:
+                    patient_fullname = click.prompt("Enter full_name of patient to record condition")
+                    selected_patient= session.query(Patient).filter(Patient.full_name.ilike(f'%{patient_fullname.strip()}%')).first()
+                    if selected_patient is None:
+                        click.secho(f"{patient_fullname} not found, enter a valid name", fg="red")
+                        continue
+                    else:
+                        condition = click.prompt(f"Enter the condition for {selected_patient.full_name}: ")
+                        add_condition(session, selected_patient, condition)
+                        click.secho("Condition successfully recorded", fg="green")
+                        confirmation= click.confirm("Do you want to return?")
+                        if confirmation:
+                            click.secho("Welcome back", fg="green")
+                            break
+    if user_option==4:
+        confirmation= click.confirm('Are you sure you want to logout?')
+        if confirmation:
+            click.secho("You have been logged out successfully", fg="green")
+            break

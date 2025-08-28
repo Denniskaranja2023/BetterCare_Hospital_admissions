@@ -56,6 +56,11 @@ def add_nurse(session,first_name, last_name, gender):
     session.add(new_nurse)
     session.commit()
 
+def add_condition(session, patient, condition):
+    """Add a new condition to a patient"""
+    patient.reported_condition = condition
+    session.commit()
+    
 
 #Ward helper function 
 def add_ward(session,ward_name, ward_capacity, ward_location, patient_count):

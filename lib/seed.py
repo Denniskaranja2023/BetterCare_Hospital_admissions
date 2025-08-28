@@ -6,7 +6,7 @@ from helper import admit_patient
 from models import Ward
 from models import Doctor
 from models import Patient
-from models import Nurse
+from models import Nurse, AdmissionsOfficer
 
 fake= Faker()
 
@@ -29,11 +29,13 @@ if __name__ == '__main__':
             first_name = fake.first_name_male()
         else:
             first_name = fake.first_name_female()
-
+        last_name = fake.last_name()
         doctor= Doctor(
             first_name= first_name,
-            last_name= fake.last_name(),
-            speciality= random.choice(specialities)   
+            last_name= last_name,
+            speciality= random.choice(specialities),
+            user_name= f'{first_name}.{last_name}'.lower(),
+            password= f'{first_name}123'.lower()
         )
         doctors.append(doctor)   
     session.add_all(doctors)
@@ -64,18 +66,29 @@ if __name__ == '__main__':
             first_name = fake.first_name_male()
         else:
             first_name = fake.first_name_female()
-
+        last_name = fake.last_name()
         nurse= Nurse(
             first_name= first_name,
-            last_name= fake.last_name(),
-            gender= gender       
+            last_name= last_name,
+            gender= gender,
+            user_name= f'{first_name}.{last_name}'.lower(),
+            password= f'{first_name}123'.lower()
         )
         nurses.append(nurse)
     session.add_all(nurses)
     session.commit()
     
-    
-    
+    for i in range(3):
+        first_name = fake.first_name()
+        last_name = fake.last_name()
+        officer = AdmissionsOfficer(
+            first_name=first_name,
+            last_name=last_name,
+            user_name=f'{first_name}.{last_name}'.lower(),
+            password=f'{first_name}123'.lower()
+        )
+        session.add(officer)
+
     for i in range(30):
         admitted = False
         while not admitted:

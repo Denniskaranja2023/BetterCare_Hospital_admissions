@@ -41,7 +41,16 @@ class Doctor(Base):
     last_name= Column(String())
     speciality= Column(String())
     patients= relationship('Patient', backref='doctor')
-    
+    user_name = Column(String(), unique=True)
+    password = Column(String())
+
+    def __init__(self, first_name, last_name, speciality, user_name, password):
+        self.first_name = first_name
+        self.last_name = last_name
+        self.speciality = speciality
+        self.user_name = f'{first_name}.{last_name}'.lower()
+        self.password = password
+
     def __repr__ (self):
         return f"<Doctor id {self.id}: Name:{self.first_name} {self.last_name}, speciality:{self.speciality}>\n"
 
@@ -70,8 +79,35 @@ class Nurse(Base):
     last_name=Column(String())
     gender=Column(String())
     patients=relationship('Patient', backref='nurse')
+    user_name = Column(String(), unique=True)
+    password = Column(String())
     
+    def __init__(self, first_name, last_name, gender, user_name, password):
+        self.first_name = first_name
+        self.last_name = last_name
+        self.gender = gender
+        self.user_name = f'{first_name}.{last_name}'.lower()
+        self.password = password
+
     def __repr__(self):
         return f"<Nurse id {self.id}: name: {self.first_name} {self.last_name},gender: {self.gender}>\n"
+
+class AdmissionsOfficer(Base):
+    __tablename__ = 'admissions_officers'
+
+    id = Column(Integer(), primary_key=True)
+    first_name = Column(String())
+    last_name = Column(String())
+    user_name = Column(String(), unique=True)
+    password = Column(String())
+
+    def __init__(self, first_name, last_name, user_name, password):
+        self.first_name = first_name
+        self.last_name = last_name
+        self.user_name = f'{first_name}.{last_name}'.lower()
+        self.password = password
+
+    def __repr__(self):
+        return f"<AdmissionsOfficer id {self.id}: name: {self.first_name} {self.last_name}>\n"
 
 Base.metadata.create_all(engine)

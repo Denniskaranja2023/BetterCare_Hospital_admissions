@@ -1,7 +1,7 @@
 import click
 from init import session
 from models import Doctor, Patient, Nurse, Ward
-from helper import admit_patient, discharge_patient, add_doctor, add_nurse, add_ward, delete_record, add_prescription, add_condition
+from helper import admit_patient, discharge_patient, add_doctor, add_nurse, add_ward, delete_record, add_prescription, add_condition, prompt_with_exit, prompt_with_exit_int
   
 while True:
     click.echo(click.style('Better Care Admissions_System:', fg="blue", bg='white', underline= True))
@@ -30,58 +30,67 @@ while True:
                     
                     if user_choice== 1:
                         while True:
-                            click.secho("Enter patient details: ", fg='yellow')
-                            full_name=click.prompt("Enter patient's full_name e.g John Doe ")
-                            gender=click.prompt("Male or Female ")
-                            age=click.prompt("Enter patient's age ", type=int)
-                            reported_condition=click.prompt("Enter patient's condition at admission: ")
-                            doctor_prescription= click.prompt("Enter doctor's prescription at admission: ")
-                            click.secho("Consider the following wards: ", fg="yellow")
-                            wards=session.query(Ward).all()
-                            for ward in wards:
-                                click.secho(f"|{ward.ward_name} ward| id: {ward.id}| capacity: {ward.ward_capacity}| current_occupants: {ward.patient_count}|\n", fg='magenta')
-                            ward_id=click.prompt("Select a ward id to admit patient ", type=int)
-                            ward_selected=session.query(Ward).filter_by(id=ward_id).first()
-                            click.secho("The following patients are in the ward: ", fg="yellow")
-                            for patient in ward_selected.patients:
-                                click.secho(patient, fg="magenta")
-                            bed_number=click.prompt("Select a bed_number for patient ", type=int)
-                            click.secho("Assign patient to one of the doctors below: ", fg="yellow")
-                            doctors=session.query(Doctor).all()
-                            for doctor in doctors:
-                                click.secho(doctor, fg="magenta")
-                            doctor_id =click.prompt("Assign doctor by selecting doctor_id ", type=int)
-                            click.secho("Assign patient to one of the nurses below: ", fg="yellow")
-                            nurses=session.query(Nurse).all()
-                            for nurse in nurses:
-                                click.secho(nurse, fg="magenta")
-                            nurse_id =click.prompt("Assign nurse by selecting nurse_id ", type=int)
-                            admit_patient(session, full_name.strip(),gender,age,reported_condition,doctor_prescription,ward_id,bed_number,doctor_id,nurse_id)
-                            click.secho(f"{full_name} successfuly admitted!", fg="green")
-                            confirmation= click.confirm("Do you want to add another Patient?")
-                            if not confirmation:
+                            try:
+                                click.secho("Enter patient details: ", fg='yellow')
+                                full_name=prompt_with_exit("Enter patient's full_name e.g John Doe or enter exit ")
+                                gender=prompt_with_exit("Male or Female or enter exit ")
+                                age=prompt_with_exit_int("Enter patient's age or enter 0 to exit ", type=int)
+                                reported_condition=prompt_with_exit("Enter patient's condition at admission or enter exit: ")
+                                doctor_prescription=prompt_with_exit("Enter doctor's prescription at admission or enter exit: ")
+                                click.secho("Consider the following wards: ", fg="yellow")
+                                wards=session.query(Ward).all()
+                                for ward in wards:
+                                    click.secho(f"|{ward.ward_name} ward| id: {ward.id}| capacity: {ward.ward_capacity}| current_occupants: {ward.patient_count}|\n", fg='magenta')
+                                ward_id=prompt_with_exit_int("Select a ward id to admit patient or enter 0 to exit ", type=int)
+                                ward_selected=session.query(Ward).filter_by(id=ward_id).first()
+                                click.secho("The following patients are in the ward: ", fg="yellow")
+                                for patient in ward_selected.patients:
+                                    click.secho(patient, fg="magenta")
+                                bed_number=prompt_with_exit_int("Select a bed_number for patient or enter 0 to exit ", type=int)
+                                click.secho("Assign patient to one of the doctors below: ", fg="yellow")
+                                doctors=session.query(Doctor).all()
+                                for doctor in doctors:
+                                    click.secho(doctor, fg="magenta")
+                                doctor_id =prompt_with_exit_int("Assign doctor by selecting doctor_id or enter 0 to exit ", type=int)
+                                click.secho("Assign patient to one of the nurses below: ", fg="yellow")
+                                nurses=session.query(Nurse).all()
+                                for nurse in nurses:
+                                    click.secho(nurse, fg="magenta")
+                                nurse_id =prompt_with_exit_int("Assign nurse by selecting nurse_id or enter 0 to exit ", type=int)
+                                admit_patient(session, full_name.strip(),gender,age,reported_condition,doctor_prescription,ward_id,bed_number,doctor_id,nurse_id)
+                                click.secho(f"{full_name} successfuly admitted!", fg="green")
+                                confirmation= click.confirm("Do you want to add another Patient?")
+                                if not confirmation:
+                                    break
+                            except KeyboardInterrupt:
+                                click.secho("\nExiting patient admission process...", fg="red")
                                 break
+                            except Exception as e:
+                                click.secho(f"Error: {e}", fg="red")
+                                continue
                             
                     if user_choice==2:
                         while True:
-                            patient_fullname= click.prompt("Enter Full name of Patient you want to remove ")
-                            selected_patient= session.query(Patient).filter(Patient.full_name.ilike(f'%{patient_fullname.strip()}%')).first()
-                            if selected_patient is None:
-                                click.secho(f"Error: Patient with name '{patient_fullname}' not found.", fg='red')
-                            else:
-                                confirmation= click.confirm('Are you sure you want to remove this patient?')
-                                if confirmation:
-                                    discharge_patient(session, selected_patient)   
-                                    click.secho(f"{selected_patient.full_name} successfuly removed!", fg="green") 
-                                    confirm_message= click.confirm("Do you want to remove another patient?")
-                                    if not confirm_message:
-                                        click.secho("welcome back", fg='green')
-                                        break
+                            try:
+                                patient_fullname= prompt_with_exit("Enter Full name of Patient you want to remove or enter exit to cancel ")
+                                selected_patient= session.query(Patient).filter(Patient.full_name.ilike(f'%{patient_fullname.strip()}%')).first()
+                                if selected_patient is None:
+                                    click.secho(f"Error: Patient with name '{patient_fullname}' not found.", fg='red')
                                 else:
-                                    confirm_message= click.confirm("Do you want to remove another patient?")
-                                    if not confirm_message:
-                                        click.secho("welcome back", fg='green')
-                                        break
+                                    confirmation= click.confirm(f'Are you sure you want to remove {selected_patient.full_name}?')
+                                    if confirmation:
+                                        discharge_patient(session, selected_patient)   
+                                        click.secho(f"{selected_patient.full_name} successfuly removed!", fg="green") 
+                                        confirm_message= click.confirm("Do you want to remove another patient?")
+                                        if not confirm_message:
+                                            click.secho("welcome back", fg='green')
+                                            break
+                            except KeyboardInterrupt:
+                                click.secho("\nExiting patient removal process...", fg="red")
+                                break
+                            except Exception as e:
+                                click.secho(f"Error: {e}", fg="red")
+                                continue
                             
                     if user_choice == 3:
                         break
@@ -91,36 +100,54 @@ while True:
                     click.secho("Choose an option: ", fg='yellow')
                     click.secho("1.Add a Doctor", fg="cyan")
                     click.secho("2.Remove a Doctor", fg="cyan")
-                    click.secho("3 return" , fg='cyan')
+                    click.secho("3 To return" , fg='cyan')
                     user_choice= click.prompt('Enter option ', type=int)
                     if user_choice == 1:
                         while True:
-                            click.secho("Enter doctor's details: ", fg='yellow')
-                            first_name=click.prompt('Enter first name ')
-                            last_name= click.prompt("Enter last name" )
-                            speciality= click.prompt("Enter doctor's speciality ")
-                            add_doctor(session, first_name.strip(), last_name.strip(), speciality)
-                            click.secho(f"{first_name} {last_name} successfully added as doctor", fg="green")
-                            confirmation= click.confirm("Do you want to add another doctor?")
-                            if not confirmation:
-                                break        
+                            try:
+                                click.secho("Enter doctor's details: ", fg='yellow')
+                                first_name=prompt_with_exit('Enter first name or enter exit to cancel ')
+                                last_name=prompt_with_exit('Enter last name or enter exit to cancel ')
+                                speciality=prompt_with_exit('Enter doctor speciality or enter exit to cancel ')
+                                add_doctor(session, first_name.strip(), last_name.strip(), speciality)
+                                click.secho(f"{first_name} {last_name} successfully added as doctor", fg="green")
+                                confirmation= click.confirm("Do you want to add another doctor?")
+                                if not confirmation:
+                                    click.secho("welcome back", fg='green')
+                                    break  
+                            except KeyboardInterrupt:
+                                click.secho("\nExiting doctor addition process...", fg="red")
+                                break
+                            except Exception as e:
+                                click.secho(f"Error: {e}", fg="red")
+                                continue
+                            
                     if user_choice == 2:
-                        while True:  
-                            doctor_firstName=click.prompt('Enter first name of doctor to be removed ' )
-                            doctor_lastName=click.prompt('Enter last name of doctor ')
-                            selected_doctor= session.query(Doctor).filter(Doctor.first_name.ilike(f"%{doctor_firstName.strip()}%"), Doctor.last_name.ilike(f'%{doctor_lastName.strip()}%')).first()
-                            if selected_doctor is None:
-                                click.secho(f"{doctor_firstName} {doctor_lastName} not found")
-                            else:
-                                confirmation= click.confirm('Are you sure you want to remove this doctor?')
-                                if confirmation:
-                                    delete_record(session, selected_doctor)
-                                    click.secho(f"{selected_doctor.first_name} {selected_doctor.last_name} successfuly removed!", fg="green")
-                                    confirm_message= click.confirm("Do you want to remove another doctor? ")
-                                    if not confirm_message:
-                                        break               
+                        while True: 
+                            try: 
+                                doctor_firstName=prompt_with_exit('Enter first name of doctor to be removed or enter exit to cancel' )
+                                doctor_lastName=prompt_with_exit('Enter last name of doctor to be removed or enter exit to cancel' )
+                                selected_doctor= session.query(Doctor).filter(Doctor.first_name.ilike(f"%{doctor_firstName.strip()}%"), Doctor.last_name.ilike(f'%{doctor_lastName.strip()}%')).first()
+                                if selected_doctor is None:
+                                    click.secho(f"{doctor_firstName} {doctor_lastName} not found")
+                                else:
+                                    confirmation= click.confirm(f'Are you sure you want to remove Dr. {selected_doctor.first_name} {selected_doctor.last_name}?')
+                                    if confirmation:
+                                        delete_record(session, selected_doctor)
+                                        click.secho(f"{selected_doctor.first_name} {selected_doctor.last_name} successfuly removed!", fg="green")
+                                        confirm_message= click.confirm("Do you want to remove another doctor? ")
+                                        if not confirm_message:
+                                            break   
+                            except KeyboardInterrupt:
+                                click.secho("\nExiting doctor removal process...", fg="red")
+                                break
+                            except Exception as e:
+                                click.secho(f"Error: {e}", fg="red")
+                                continue
+                            
                     if user_choice == 3:
                         break
+                    
             if user_entry==3:
                 while True:
                     click.secho("Choose an option: ", fg='yellow')
@@ -130,39 +157,53 @@ while True:
                     user_choice= click.prompt('Enter option ', type=int)
                     if user_choice == 1:
                         while True:
-                            click.secho("Enter nurse's details: ", fg='yellow')
-                            first_name=click.prompt('Enter first name ')
-                            last_name= click.prompt("Enter last name" )
-                            gender= click.prompt("Enter nurse's gender ")
-                            add_nurse(session, first_name.strip(), last_name.strip(), gender)
-                            click.secho(f"{first_name} {last_name} successfully added as nurse", fg="green")
-                            confirmation= click.confirm('Do you want to add another nurse?')
-                            if not confirmation:
-                                click.secho("welcome back", fg='green')
+                            try:
+                                click.secho("Enter nurse's details: ", fg='yellow')
+                                first_name=prompt_with_exit('Enter first name or enter exit to cancel ')
+                                last_name=prompt_with_exit('Enter last name or enter exit to cancel ')
+                                gender=prompt_with_exit('Enter gender of nurse or enter exit to cancel ')
+                                add_nurse(session, first_name.strip(), last_name.strip(), gender)
+                                click.secho(f"{first_name} {last_name} successfully added as nurse", fg="green")
+                                confirmation= click.confirm('Do you want to add another nurse?')
+                                if not confirmation:
+                                    click.secho("welcome back", fg='green')
+                                    break
+                            except KeyboardInterrupt:
+                                click.secho("\nExiting nurse addition process...", fg="red")
                                 break
-                                
+                            except Exception as e:
+                                click.secho(f"Error: {e}", fg="red")
+                                continue
+
                     if user_choice == 2:
                         while True:
-                            nurse_firstName=click.prompt('Enter first name of nurse to be removed ' )
-                            nurse_lastName=click.prompt('Enter last name of nurse ')
-                            selected_nurse= session.query(Nurse).filter(Nurse.first_name.ilike(f'%{nurse_firstName.strip()}%'), Nurse.last_name.ilike(f'%{nurse_lastName.strip()}%')).first()
-                            if selected_nurse is None:
-                                click.secho(f"{nurse_firstName} {nurse_lastName} not found")
-                            else:
-                                confirmation= click.confirm('Are you sure you want to remove this nurse?')
-                                if confirmation:
-                                    delete_record(session, selected_nurse)
-                                    click.secho(f"{selected_nurse.first_name} {selected_nurse.last_name} successfuly removed!", fg="green")
-                                    confirm_message= click.confirm("Do you want to remove another nurse?")
-                                    if not confirm_message:
-                                        click.secho("Welcome back", fg='green')
-                                        break
+                            try:
+                                nurse_firstName=prompt_with_exit('Enter first name of nurse to be removed or exit to cancel ')
+                                nurse_lastName=prompt_with_exit('Enter last name of nurse or exit to cancel ')
+                                selected_nurse= session.query(Nurse).filter(Nurse.first_name.ilike(f'%{nurse_firstName.strip()}%'), Nurse.last_name.ilike(f'%{nurse_lastName.strip()}%')).first()
+                                if selected_nurse is None:
+                                    click.secho(f"{nurse_firstName} {nurse_lastName} not found")
                                 else:
-                                    confirm_message= click.confirm("Do you want to remove another nurse?")
-                                    if not confirm_message:
-                                        click.secho("Welcome back", fg='green')
+                                    confirmation= click.confirm(f'Are you sure you want to remove {selected_nurse.first_name} {selected_nurse.last_name}?')
+                                    if confirmation:
+                                        delete_record(session, selected_nurse)
+                                        click.secho(f"{selected_nurse.first_name} {selected_nurse.last_name} successfuly removed!", fg="green")
+                                        confirm_message= click.confirm("Do you want to remove another nurse?")
+                                        if not confirm_message:
+                                            click.secho("Welcome back", fg='green')
+                                            break
+                                    else:
+                                        confirm_message= click.confirm("Do you want to remove another nurse?")
+                                        if not confirm_message:
+                                            click.secho("Welcome back", fg='green')
                                         break
-                                    
+                            except KeyboardInterrupt:
+                                click.secho("\nExiting nurse removal process...", fg="red")
+                                break
+                            except Exception as e:
+                                click.secho(f"Error occurred: {e}", fg="red")
+                                continue
+                            
                     if user_choice == 3:
                         break  
                          
@@ -176,43 +217,58 @@ while True:
                     
                     if user_choice == 1:
                         while True:
-                            click.secho("Enter Ward details: ", fg='yellow')
-                            ward_name=click.prompt('Enter ward name ')
-                            ward_capacity= click.prompt("Enter ward full-capacity ", type=int )
-                            ward_location= click.prompt("Enter ward location (Building,floor) ")
-                            patient_count=0
-                            add_ward(session, ward_name.strip(), ward_capacity, ward_location, patient_count)
-                            click.secho(f"{ward_name} ward successfully added", fg="green")
-                            confirm_message= click.confirm("Do you want to add another ward?")
-                            if not confirm_message:
-                                click.secho("Welcome back", fg='green')
+                            try:
+                                click.secho("Enter Ward details: ", fg='yellow')
+                                ward_name=prompt_with_exit('Enter ward name or enter exit to cancel')
+                                ward_capacity= prompt_with_exit_int("Enter ward full-capacity or enter 0 to exit ", type=int )
+                                ward_location= prompt_with_exit('Enter ward location (Building,floor) or enter exit to cancel')
+                                patient_count=0
+                                add_ward(session, ward_name.strip(), ward_capacity, ward_location, patient_count)
+                                click.secho(f"{ward_name} ward successfully added", fg="green")
+                                confirm_message= click.confirm("Do you want to add another ward?")
+                                if not confirm_message:
+                                    click.secho("Welcome back", fg='green')
+                                    break
+                            except KeyboardInterrupt:
+                                click.secho("\nExiting ward addition process...", fg="red")
                                 break
+                            except Exception as e:
+                                click.secho(f"Error occurred: {e}", fg="red")
+                                continue
                         
                     if user_choice == 2:
                         while True:
-                            name_of_ward =click.prompt('Enter name of ward to be removed ' )
-                            capacity_of_ward= click.prompt("Enter capacity of ward(5-10)", type=int)
-                            selected_ward= session.query(Ward).filter(Ward.ward_name == name_of_ward.strip(), Ward.ward_capacity == capacity_of_ward).first()
-                            if selected_ward is None:
-                                click.secho(f"{name_of_ward} ward not found")
-                            else:
-                                confirmation= click.confirm('Are you sure you want to remove this ward?')
-                                if confirmation:
-                                    delete_record(session, selected_ward)
-                                    click.secho(f"{selected_ward.ward_name} ward successfuly removed!", fg="green")
-                                    confirm_message= click.confirm("Do you want to remove another ward?")
-                                    if not confirm_message:
-                                        click.secho("Welcome back", fg='green')
-                                        break
-                                
+                            try:
+                                name_of_ward = prompt_with_exit('Enter name of ward to be removed or enter exit to cancel ')
+                                capacity_of_ward = prompt_with_exit_int("Enter capacity of ward(5-10) or enter 0 to exit", type=int)
+                                selected_ward = session.query(Ward).filter(Ward.ward_name == name_of_ward.strip(), Ward.ward_capacity == capacity_of_ward).first()
+                                if selected_ward is None:
+                                    click.secho(f"{name_of_ward} ward not found")
+                                else:
+                                    confirmation= click.confirm('Are you sure you want to remove this ward?')
+                                    if confirmation:
+                                        delete_record(session, selected_ward)
+                                        click.secho(f"{selected_ward.ward_name} ward successfuly removed!", fg="green")
+                                        confirm_message= click.confirm("Do you want to remove another ward?")
+                                        if not confirm_message:
+                                            click.secho("Welcome back", fg='green')
+                                            break
+                            except KeyboardInterrupt:
+                                click.secho("\nExiting ward removal process...", fg="red")
+                                break
+                            except Exception as e:
+                                click.secho(f"Error occurred: {e}", fg="red")
+                                continue
+                            
                     if user_choice == 3:
                         break
                     
             if user_entry ==5:
-                confirmation= click.confirm('Are you sure you want to return to home?')
+                confirmation= click.confirm('\nAre you sure you want to return to home?')
                 if confirmation:
-                    click.secho("Welcome home", fg="green")
+                    click.secho("\nWelcome home", fg="green")
                     break
+                
     if user_option== 2:
         while True:
             click.secho("1.Check a patient's condition", fg='cyan')
@@ -220,54 +276,71 @@ while True:
             click.secho("3.Return to home", fg='cyan')  
             user_entry= click.prompt("Enter an option ", type=int)
             if user_entry == 1:
-                doctor_id= click.prompt("Kindly enter your Doctor's id ", type=int)
-                doctor_selected = session.query(Doctor).filter_by(id = doctor_id).first()
-                if not doctor_selected:
-                    click.secho(f"doctor id {doctor_id} not found", fg="red")
-                    continue
-                click.secho(f"Hi Dr.{doctor_selected.first_name} {doctor_selected.last_name}\n", fg='yellow')   
-                click.secho("The following are patients assigned to you:", fg='yellow')
-                for patient in doctor_selected.patients:
-                    click.secho(f"{patient}", fg="magenta")
                 while True:
-                    patient_fullname = click.prompt("Enter full_name of patient to view condition")
-                    selected_patient= session.query(Patient).filter(Patient.full_name.ilike(f'%{patient_fullname.strip()}%')).first()
-                    if selected_patient is None:
-                        click.secho(f"{patient_fullname} not found, enter a valid name", fg="red")
+                    try:
+                        doctor_id= prompt_with_exit_int("Kindly enter your Doctor's id or enter 0 to exit ", type=int)
+                        doctor_selected = session.query(Doctor).filter_by(id = doctor_id).first()
+                        if not doctor_selected:
+                            click.secho(f"doctor id {doctor_id} not found", fg="red")
+                            continue
+                        click.secho(f"Hi Dr.{doctor_selected.first_name} {doctor_selected.last_name}\n", fg='yellow')   
+                        click.secho("The following are patients assigned to you:", fg='yellow')
+                        for patient in doctor_selected.patients:
+                            click.secho(f"{patient}", fg="magenta")
+                        while True:
+                            patient_fullname = prompt_with_exit("Enter full_name of patient to view condition or enter exit to cancel")
+                            selected_patient= session.query(Patient).filter(Patient.full_name.ilike(f'%{patient_fullname.strip()}%')).first()
+                            if selected_patient is None:
+                                click.secho(f"{patient_fullname} not found, enter a valid name", fg="red")
+                                continue
+                            else:
+                                click.secho(f"latest reported condition:{selected_patient.reported_condition}", fg="yellow")
+                                confirmation= click.confirm("Do you want to return?")
+                                if confirmation:
+                                   break
+                    except KeyboardInterrupt:
+                        click.secho("\nOperation cancelled.", fg="red")
+                        break
+                    except Exception as e:
+                        click.secho(f"An error occurred: {e}", fg="red")
                         continue
-                    else:
-                        click.secho(f"latest reported condition:{selected_patient.reported_condition}", fg="yellow")
-                        confirmation= click.confirm("Do you want to return?")
-                        if confirmation:
-                            break
+                
             if user_entry == 2:
-                doctor_id= click.prompt("Kindly enter your Doctor's id ", type=int)
-                doctor_selected = session.query(Doctor).filter_by(id = doctor_id).first()
-                if not doctor_selected:
-                    click.secho(f"doctor id {doctor_id} not found", fg="red")
-                    continue
-                click.secho(f"Hi Dr.{doctor_selected.first_name} {doctor_selected.last_name}\n", fg='yellow')   
-                click.secho("The following are patients assigned to you:", fg='yellow')
-                for patient in doctor_selected.patients:
-                    click.secho(f"{patient}", fg="magenta")
                 while True:
-                    patient_fullname= click.prompt("Enter full_name of patient you want to make prescription for")
-                    selected_patient= session.query(Patient).filter(Patient.full_name.ilike(f'%{patient_fullname.strip()}%')).first()
-                    if selected_patient is None:
-                        click.secho(f"{patient_fullname} not found, enter a valid name", fg="red")
+                    try:
+                        doctor_id= prompt_with_exit_int("Kindly enter your Doctor's id or enter 0 to exit ", type=int)
+                        doctor_selected = session.query(Doctor).filter_by(id = doctor_id).first()
+                        if not doctor_selected:
+                            click.secho(f"doctor id {doctor_id} not found", fg="red")
+                            continue
+                        click.secho(f"Hi Dr.{doctor_selected.first_name} {doctor_selected.last_name}\n", fg='yellow')   
+                        click.secho("The following are patients assigned to you:", fg='yellow')
+                        for patient in doctor_selected.patients:
+                            click.secho(f"{patient}", fg="magenta")
+                        while True:
+                            patient_fullname= prompt_with_exit("Enter full_name of patient you want to make prescription for or enter exit to cancel")
+                            selected_patient= session.query(Patient).filter(Patient.full_name.ilike(f'%{patient_fullname.strip()}%')).first()
+                            if selected_patient is None:
+                                click.secho(f"{patient_fullname} not found, enter a valid name", fg="red")
+                                continue
+                            else:
+                                prescription=prompt_with_exit(f"Enter your prescription for {selected_patient.full_name} or enter exit to cancel: ")
+                                add_prescription(session, selected_patient, prescription)
+                                click.secho("Prescription successfuly added" , fg="green")
+                                confirmation= click.confirm("Do you want to make another prescription")
+                                if not confirmation:
+                                    break
+                    except KeyboardInterrupt:
+                        click.secho("\nOperation cancelled.", fg="red")
+                        break
+                    except Exception as e:
+                        click.secho(f"An error occurred: {e}", fg="red")
                         continue
-                    else:
-                        prescription=click.prompt(f"Enter your prescription for {selected_patient.full_name}: ")
-                        add_prescription(session, selected_patient, prescription)
-                        click.secho("Prescription successfuly added" , fg="green")
-                        confirmation= click.confirm("Do you want to return?")
-                        if confirmation:
-                            break
-                        
+                    
             if user_entry==3:
                 confirmation= click.confirm('Are you sure you want to return to home?')
                 if confirmation:
-                    click.secho("Welcome home", fg="green")
+                    click.secho("\nWelcome home", fg="green")
                     break
                 
     if user_option==3:
@@ -277,54 +350,77 @@ while True:
             click.secho("3.Return to home", fg='cyan')
             user_entry= click.prompt("Enter an option ", type=int)
             if user_entry == 1:
-                nurse_id= click.prompt("Kindly enter your Nurse's id ", type=int)
-                nurse_selected = session.query(Nurse).filter_by(id = nurse_id).first()
-                if not nurse_selected:
-                    click.secho(f"nurse id {nurse_id} not found", fg="red")
-                    continue
-                click.secho(f"Hi {nurse_selected.first_name} {nurse_selected.last_name}\n", fg='yellow')   
-                click.secho("The following are patients assigned to you:", fg='yellow')
-                for patient in nurse_selected.patients:
-                    click.secho(f"{patient}", fg="magenta")
                 while True:
-                    patient_fullname = click.prompt("Enter full_name of patient to view prescription")
-                    selected_patient= session.query(Patient).filter(Patient.full_name.ilike(f'%{patient_fullname.strip()}%')).first()
-                    if selected_patient is None:
-                        click.secho(f"{patient_fullname} not found, enter a valid name", fg="red")
-                        continue
-                    else:
-                        click.secho(f"latest doctor's prescription:{selected_patient.doctor_prescription}", fg="yellow")
-                        confirmation= click.confirm("Do you want to return?")
-                        if confirmation:
-                            click.secho("Welcome back", fg="green")
-                            break
-                        
+                    try:
+                        nurse_id= prompt_with_exit_int("Kindly enter your Nurse's id or enter 0 to exit ", type=int)
+                        nurse_selected = session.query(Nurse).filter_by(id = nurse_id).first()
+                        if not nurse_selected:
+                            click.secho(f"nurse id {nurse_id} not found", fg="red")
+                            continue
+                        click.secho(f"Hi {nurse_selected.first_name} {nurse_selected.last_name}\n", fg='yellow')   
+                        click.secho("The following are patients assigned to you:", fg='yellow')
+                        for patient in nurse_selected.patients:
+                            click.secho(f"{patient}", fg="magenta")
+                        while True:
+                            patient_fullname = prompt_with_exit("Enter full_name of patient to view prescription or enter exit to cancel")
+                            selected_patient= session.query(Patient).filter(Patient.full_name.ilike(f'%{patient_fullname.strip()}%')).first()
+                            if selected_patient is None:
+                                click.secho(f"{patient_fullname} not found, enter a valid name", fg="red")
+                                continue
+                            else:
+                                click.secho(f"Latest prescription from Dr. {selected_patient.doctor.first_name} {selected_patient.doctor.last_name} for {selected_patient.full_name} : {selected_patient.doctor_prescription}", fg="yellow")
+                                confirmation= click.confirm("Do you want to check prescription for another patient?")
+                                if not confirmation:
+                                    click.secho("Welcome back", fg="green")
+                                    break
+                    except KeyboardInterrupt:
+                        click.secho("\nOperation cancelled.", fg="red")
+                        break
+                    except Exception as e:
+                        click.secho(f"\nAn error occurred: {e}", fg="red")
+                        break
+
             if user_entry == 2:
-                nurse_id= click.prompt("Kindly enter your Nurse's id ", type=int)
-                nurse_selected = session.query(Nurse).filter_by(id =nurse_id).first()
-                if not nurse_selected:
-                    click.secho(f"nurse id {nurse_id} not found", fg="red")
-                    continue
-                click.secho(f"Hi {nurse_selected.first_name} {nurse_selected.last_name}\n", fg='yellow')   
-                click.secho("The following are patients assigned to you:", fg='yellow')
-                for patient in nurse_selected.patients:
-                    click.secho(f"{patient}", fg="magenta")
                 while True:
-                    patient_fullname = click.prompt("Enter full_name of patient to record condition")
-                    selected_patient= session.query(Patient).filter(Patient.full_name.ilike(f'%{patient_fullname.strip()}%')).first()
-                    if selected_patient is None:
-                        click.secho(f"{patient_fullname} not found, enter a valid name", fg="red")
-                        continue
-                    else:
-                        condition = click.prompt(f"Enter the condition for {selected_patient.full_name}: ")
-                        add_condition(session, selected_patient, condition)
-                        click.secho("Condition successfully recorded", fg="green")
-                        confirmation= click.confirm("Do you want to return?")
-                        if confirmation:
-                            click.secho("Welcome back", fg="green")
-                            break
+                    try:
+                        nurse_id= prompt_with_exit_int("Kindly enter your Nurse's id or enter 0 to exit ", type=int)
+                        nurse_selected = session.query(Nurse).filter_by(id =nurse_id).first()
+                        if not nurse_selected:
+                            click.secho(f"nurse id {nurse_id} not found", fg="red")
+                            continue
+                        click.secho(f"Hi {nurse_selected.first_name} {nurse_selected.last_name}\n", fg='yellow')   
+                        click.secho("The following are patients assigned to you:\n", fg='yellow')
+                        for patient in nurse_selected.patients:
+                            click.secho(f"{patient}", fg="magenta")
+                        while True:
+                            patient_fullname = prompt_with_exit("Enter full_name of patient to record condition or enter exit to cancel")
+                            selected_patient= session.query(Patient).filter(Patient.full_name.ilike(f'%{patient_fullname.strip()}%')).first()
+                            if selected_patient is None:
+                                click.secho(f"{patient_fullname} not found, enter a valid name", fg="red")
+                                continue
+                            else:
+                                condition = prompt_with_exit(f"Enter the condition for {selected_patient.full_name} or enter exit to cancel")
+                                add_condition(session, selected_patient, condition)
+                                click.secho("Condition successfully recorded", fg="green")
+                                confirmation= click.confirm("Do you want to update condition for another patient?")
+                                if not confirmation:
+                                    click.secho("Welcome back", fg="green")
+                                    break
+                    except KeyboardInterrupt:
+                        click.secho("\nOperation cancelled.", fg="red")
+                        break
+                    except Exception as e:
+                        click.secho(f"\nAn error occurred: {e}", fg="red")
+                        break
+                    
+            if user_entry==3:
+                confirmation= click.confirm('\nAre you sure you want to return to home?')
+                if confirmation:
+                    click.secho("\nWelcome home", fg="green")
+                    break
+                
     if user_option==4:
-        confirmation= click.confirm('Are you sure you want to logout?')
+        confirmation= click.confirm('\nAre you sure you want to logout?')
         if confirmation:
-            click.secho("You have been logged out successfully", fg="green")
+            click.secho("\nYou have been logged out successfully...", fg="green")
             break

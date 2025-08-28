@@ -1,3 +1,4 @@
+import click
 from init import session
 from models import Doctor, Patient, Nurse, Ward
 
@@ -80,5 +81,19 @@ def delete_record(session, ward):
     """Remove a record"""
     session.delete(ward)
     session.commit()
-    
+
+
+def prompt_with_exit(message, **kwargs):
+    """Wrapper around click.prompt that breaks if user types 'exit'."""
+    value = click.prompt(message, **kwargs)
+    if isinstance(value, str) and value.strip().lower() == "exit":
+        raise KeyboardInterrupt
+    return value
+
+def prompt_with_exit_int(message, **kwargs):
+    """Wrapper around click.prompt that breaks if user enters 0."""
+    value = click.prompt(message, **kwargs)
+    if isinstance(value, int) and value == 0:
+        raise KeyboardInterrupt
+    return value
 

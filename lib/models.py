@@ -48,7 +48,7 @@ class Doctor(Base):
         self.first_name = first_name
         self.last_name = last_name
         self.speciality = speciality
-        self.user_name = f'{first_name}.{last_name}'.lower()
+        self.user_name = user_name
         self.password = password
 
     def __repr__ (self):
@@ -86,7 +86,7 @@ class Nurse(Base):
         self.first_name = first_name
         self.last_name = last_name
         self.gender = gender
-        self.user_name = f'{first_name}.{last_name}'.lower()
+        self.user_name = user_name
         self.password = password
 
     def __repr__(self):

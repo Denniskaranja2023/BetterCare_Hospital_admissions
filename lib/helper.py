@@ -31,12 +31,14 @@ def discharge_patient(session, patient):
     session.commit()
 
 #Doctor helper functions  
-def add_doctor(session,first_name, last_name, speciality):
+def add_doctor(session,first_name, last_name, speciality, user_name, password):
     """Add a new doctor"""
     new_doctor= Doctor(
              first_name=first_name,
              last_name= last_name,
-             speciality=speciality       
+             speciality=speciality,
+             user_name=user_name,
+             password=password
              )
     session.add(new_doctor)
     session.commit()
@@ -47,12 +49,14 @@ def add_prescription(session, patient, prescription):
     session.commit()
 
 #Nurse helper functions  
-def add_nurse(session,first_name, last_name, gender):
+def add_nurse(session,first_name, last_name, gender, user_name, password):
     """Add a new nurse"""
     new_nurse= Nurse(
              first_name= first_name,
              last_name= last_name,
-             gender= gender      
+             gender= gender,
+             user_name=user_name,
+             password=password
              )
     session.add(new_nurse)
     session.commit()

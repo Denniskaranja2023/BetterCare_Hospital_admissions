@@ -1,6 +1,6 @@
 import click
 from init import session
-from models import Doctor, Patient, Nurse, Ward
+from models import Doctor, Patient, Nurse, Ward, AdmissionsOfficer
 from helper import admit_patient, discharge_patient, add_doctor, add_nurse, add_ward, delete_record, add_prescription, add_condition, prompt_with_exit, prompt_with_exit_int
   
 while True:
@@ -12,6 +12,17 @@ while True:
     click.secho("4.To logout", fg="cyan")
     user_option= click.prompt('Enter option ', type=int)
     if user_option== 1:
+        if session.query(AdmissionsOfficer).count() == 0:
+            click.secho("No admissions officers found. Please add one first into database.", fg='red')
+            continue
+        click.secho("Please login to continue", fg='yellow')
+        user_name = click.prompt("Enter your username ")
+        password = click.prompt("Enter your password ")
+        officer = session.query(AdmissionsOfficer).filter_by(user_name=user_name, password=password).first()
+        if not officer:
+            click.secho("Invalid credentials. Please try again.", fg='red')
+            continue
+        click.secho(f"Login successful, welcome {officer.first_name} {officer.last_name}!\n", fg='green')
         while True:
             click.secho("Hi! Choose an action below", fg='yellow')
             click.secho("1.Admit or remove a Patient", fg='cyan')
@@ -109,7 +120,9 @@ while True:
                                 first_name=prompt_with_exit('Enter first name or enter exit to cancel ')
                                 last_name=prompt_with_exit('Enter last name or enter exit to cancel ')
                                 speciality=prompt_with_exit('Enter doctor speciality or enter exit to cancel ')
-                                add_doctor(session, first_name.strip(), last_name.strip(), speciality)
+                                user_name=prompt_with_exit('Enter a username for the doctor or enter exit to cancel ')
+                                password= prompt_with_exit('Enter a password for the doctor or enter exit to cancel ')
+                                add_doctor(session, first_name.strip(), last_name.strip(), speciality, user_name.strip(), password.strip())
                                 click.secho(f"{first_name} {last_name} successfully added as doctor", fg="green")
                                 confirmation= click.confirm("Do you want to add another doctor?")
                                 if not confirmation:
@@ -162,7 +175,9 @@ while True:
                                 first_name=prompt_with_exit('Enter first name or enter exit to cancel ')
                                 last_name=prompt_with_exit('Enter last name or enter exit to cancel ')
                                 gender=prompt_with_exit('Enter gender of nurse or enter exit to cancel ')
-                                add_nurse(session, first_name.strip(), last_name.strip(), gender)
+                                user_name=prompt_with_exit('Enter a username for the nurse or enter exit to cancel ')
+                                password=prompt_with_exit('Enter a password for the nurse or enter exit to cancel ')
+                                add_nurse(session, first_name.strip(), last_name.strip(), gender.strip(), user_name.strip(), password.strip())
                                 click.secho(f"{first_name} {last_name} successfully added as nurse", fg="green")
                                 confirmation= click.confirm('Do you want to add another nurse?')
                                 if not confirmation:
@@ -270,7 +285,16 @@ while True:
                     break
                 
     if user_option== 2:
+        click.secho("Please login to continue", fg='yellow')
+        user_name= click.prompt('Enter your username')
+        password= click.prompt('Enter your password ')
+        doctor = session.query(Doctor).filter_by(user_name=user_name, password=password).first()
+        if not doctor:
+            click.secho("Invalid username or password", fg='red')
+            continue
+        click.secho(f"\nLogin successful, welcome Dr.{doctor.first_name} {doctor.last_name}!\n", fg='green')
         while True:
+            click.secho("Choose an action below", fg='yellow')
             click.secho("1.Check a patient's condition", fg='cyan')
             click.secho("2.Make a prescription for a patient", fg='cyan')
             click.secho("3.Return to home", fg='cyan')  
@@ -295,8 +319,8 @@ while True:
                                 continue
                             else:
                                 click.secho(f"latest reported condition:{selected_patient.reported_condition}", fg="yellow")
-                                confirmation= click.confirm("Do you want to return?")
-                                if confirmation:
+                                confirmation= click.confirm("Do you want to view another patient condition?")
+                                if not confirmation:
                                    break
                     except KeyboardInterrupt:
                         click.secho("\nOperation cancelled.", fg="red")
@@ -344,6 +368,15 @@ while True:
                     break
                 
     if user_option==3:
+        click.secho("Please login to continue", fg='yellow')
+        user_name= click.prompt('Enter your username')
+        password= click.prompt('Enter your password ')
+        nurse= session.query(Nurse).filter_by(user_name=user_name, password=password).first()
+        if not nurse:
+            click.secho("Invalid username or password", fg='red')
+            continue
+        click.secho(f"\nLogin successful, welcome {nurse.first_name} {nurse.last_name}!\n", fg='green')
+        click.secho("Choose an action below", fg='yellow')
         while True:
             click.secho("1.Check doctor's prescription for a patient", fg='cyan')
             click.secho("2.Record a patient's condition", fg='cyan')
@@ -399,7 +432,7 @@ while True:
                                 click.secho(f"{patient_fullname} not found, enter a valid name", fg="red")
                                 continue
                             else:
-                                condition = prompt_with_exit(f"Enter the condition for {selected_patient.full_name} or enter exit to cancel")
+                                condition = prompt_with_exit(f"Enter the condition of {selected_patient.full_name} or enter exit to cancel")
                                 add_condition(session, selected_patient, condition)
                                 click.secho("Condition successfully recorded", fg="green")
                                 confirmation= click.confirm("Do you want to update condition for another patient?")

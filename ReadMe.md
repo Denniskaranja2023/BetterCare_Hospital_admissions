@@ -3,7 +3,7 @@ Better care is a quick and efficient CLI application for managing patient admiss
 
 By Dennis Karanja
 ## Description
-Better care is a CLI application that is designed to be used by hospital staff to manage patient admission data. Admission officers can login and admit a patient by assigning them a ward,  a bed,a doctor and nurse. They may also add or remove nurses, doctors or wards from the database. A doctor can login, view the condition of patients assigned and make prescriptions for the attention of nurses. A nurse can login, update the condition of patients for the attention of doctors and view any prescriptions made by doctors so as to action them.  
+Better_Care is a CLI application that is designed to be used by hospital staff to manage patient admission data. Admission officers can login and admit a patient by assigning them a ward, a bed,a doctor and nurse. They may also add or remove nurses, doctors or wards from the database. A doctor can login, view the condition of patients assigned and make prescriptions for the attention of nurses. A nurse can login, update the condition of patients for the attention of doctors and view any prescriptions made by doctors so as to action them.  
 ## How to setup
 1. Clone this repository into your gadget, through your terminal
 
@@ -17,20 +17,26 @@ Better care is a CLI application that is designed to be used by hospital staff t
 4. In your code editor, open terminal and install all the packages used in development enter and run the following command.
        
        pipenv install
-5. Create and enter a virtiual python environment by running the command below:
+5. Create and enter a virtual python environment by running the command below:
     
        pipenv shell
 6. Change directory to the lib directory that contains all the project files:
        
        cd lib
-7. Run the following command to seed the database(populate it with arbitrary placeholder data)
+7. To generate a new database, delete the existing database if any, ensure that you are in the lib directory then run the following command
+       
+       alembic revision --autogenerate -m "Add a database"
+8. Then run the following command to generate the database
+
+       alembic upgrade head
+9. Run the following command to seed the database(populate it with placeholder data)
        
        python seed.py
-8. Run the following command on your terminal to be able to enter the CLI application
+10. Run the following command on your terminal to be able to enter the CLI application
        
-       python main.py
+        python main.py
 ## Accessing the database
-The database data appears once seed.py has been run. The database can be acessed as hospital_admissions.db. The database has five main tables: admissions_officers, doctors, nurses, patients and wards. There is also an alembic table that updates on alembic migrations
+The database data appears once seed.py has been run. The database can be acessed as hospital_admissions.db.It has five main tables: admissions_officers, doctors, nurses, patients and wards. There is also an alembic table that updates on alembic migrations.
 
 ![hospital_admissions.db](./lib/img/database.png)
 ## Admissions officer role
@@ -63,11 +69,20 @@ The username and logins of a nurse can be checked in the database after seeding 
 - You can record the condition of a patient through option 2
 - You can return home through option 3
 ## Logging out
-To logout as a user, navigate to home and enter the fourth option by entering 4. On entering 4, a confirmation message will appear. To logout, confirm through entering
+To logout as a user, navigate to home and enter the fourth option by entering 4. On entering 4, a confirmation message will appear. To logout, confirm through entering Y
 
 ![Lougout](./lib/img/logout.png)
 ## Other features
-The CLI application is developed in such away that at almost every point, it is possible to return through either the exit option or the entering 0. 
+The CLI application is developed in such away that at almost every point, it is possible to return through either the exit option or the entering 0. The CLI application also allows alembic migrations. To initiate an empty database, delete the existing database and 
+1. Ensure you have navigated your way to the lib folder
+
+       cd lib
+2. Run the following command:
+
+       alembic revision --autogenerate -m "Add a database"
+3. Seed the database(add placeholder data)
+
+       python seed.py
 ## Technologies used
 - Python
 - SQlite 

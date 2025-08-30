@@ -91,7 +91,7 @@ The CLI application is developed in such away that at almost every point, it is 
 ## Contacts
 +254 711606734
 
-Email: [click here](denniswanyeki2021@gmail.com)
+Email: [denniswanyeki2021@gmail.com](denniswanyeki2021@gmail.com)
 
 &copy; 2025
 
